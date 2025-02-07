@@ -35,3 +35,5 @@ export const STEINERMATH =
 
 export const JABRONIS =
   "Goodnight FEETAMANIACS and jabronie marks without a life that don't know it a work when you work a work and work yourself into a shoot,marks";
+
+export const INITIALPOINTS = 1000; // Set your initial points value here
