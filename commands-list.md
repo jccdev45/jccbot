@@ -85,3 +85,9 @@ $setpoints <username> <amount>
 
 Set a user's points to a specific amount. Can only be used by the channel owner.
 Example: $setpoints UserName 1000
+
+```txt
+$updateemotes
+```
+
+Updates the list of channel emotes. Can only be used by moderators or the channel owner

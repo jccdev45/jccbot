@@ -1,5 +1,6 @@
 import type { ChatUserstate } from "tmi.js";
-import { EMOTES, JABRONIS, QUOTES, STEINERMATH } from "./constants";
+import { JABRONIS, QUOTES, STEINERMATH } from "./constants";
+import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher";
 
 // Utility function
 function generateRandomItem<T>(array: T[]): T {
@@ -8,8 +9,14 @@ function generateRandomItem<T>(array: T[]): T {
 
 // Command handlers
 export const commands = {
-  emote: (channel: string) => {
-    return generateRandomItem(EMOTES.all);
+  emote: async (channel: string, userstate: ChatUserstate) => {
+    try {
+      const randomEmote = await getRandomEmote();
+      return randomEmote;
+    } catch (error) {
+      console.error("Error getting random emote:", error);
+      return "Error fetching emote. Please try again later.";
+    }
   },
 
   quote: (channel: string) => {
@@ -51,7 +58,23 @@ export const commands = {
       return `@${userstate.username} Sorry, couldn't fetch a trivia question stonecoldStunner`;
     }
   },
+
+  updateemotes: async (channel: string, userstate: ChatUserstate) => {
+    if (userstate.mod || userstate.username === channel.replace("#", "")) {
+      try {
+        const emotes = await fetchAndUpdateEmotes();
+        return `Emotes updated. Total emotes: ${emotes.length}`;
+      } catch (error) {
+        console.error("Error updating emotes:", error);
+        return `Error updating emotes. Please check the logs.`;
+      }
+    } else {
+      return "This command is for moderators only.";
+    }
+  },
 };
+
+export type CommandName = keyof typeof commands;
 
 // Types for our command handlers
 export type CommandHandler = (

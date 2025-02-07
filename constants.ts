@@ -1,58 +1,11 @@
-// Arrays and Objects
-export const EMOTES = {
-  all: [
-    "Andre",
-    "APPROVED",
-    "ARISEN",
-    "cenaJAM",
-    "cenaJAMPARTY",
-    "CheersStoneCold",
-    "Clime",
-    "CONSIDERING",
-    "dogHotDog",
-    "Exquisite",
-    "GOODOLJR",
-    "hurryup",
-    "jccBirf",
-    "jccLucy",
-    "jccSwag",
-    "Jime",
-    "Lime",
-    "limeJAM",
-    "LimeThicc",
-    "livJAM",
-    "machoTasty",
-    "MID",
-    "MilkOMania",
-    "mistleToe",
-    "MYPAINISCONSTANTANDSHARPANDIDONOTHOPEFORABETTERWORLDFORANYONE",
-    "NOISILDUR",
-    "OhYeah",
-    "OmegaApproves",
-    "OmegaStare",
-    "owoSpin",
-    "patrickPls",
-    "PercAngle",
-    "POOCH",
-    "Selfieee",
-    "shrock",
-    "SlimJim",
-    "SpiritEel",
-    "STARE",
-    "Staring",
-    "StoneColdCaughtTrolling2",
-    "StoneColdFuckYou",
-    "stonecoldStunner",
-    "SuckIt",
-    "UndertakerLaugh",
-    "VibeGandalf",
-    "wow",
-    "YEAH",
-    "YouLookFlyToday",
-    "ZaynDance",
-  ],
-  success: [],
-};
+import type { CommandName } from "./commands";
+
+export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
+  { command: "emote", weight: 0.5 },
+  { command: "quote", weight: 0.5 },
+];
+export const MIN_INTERVAL = 15 * 60 * 1000; // 15 minutes
+export const MAX_INTERVAL = 45 * 60 * 1000; // 45 minutes
 
 export const QUOTES = [
   `"And that's the bottom line, 'cause Stone Cold said so" StoneColdFuckYou`,
