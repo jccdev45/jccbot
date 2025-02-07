@@ -1,12 +1,14 @@
-import type { CommandName } from "./commands";
+import type { CommandName } from "./types";
 
 export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
   { command: "emote", weight: 0.5 },
   { command: "quote", weight: 0.5 },
 ];
-export const MIN_INTERVAL = 15 * 60 * 1000; // 15 minutes
-export const MAX_INTERVAL = 45 * 60 * 1000; // 45 minutes
 
+// TRIVIA
+export const INITIALPOINTS = 1000;
+
+// VARIOUS STRINGS
 export const QUOTES = [
   `"And that's the bottom line, 'cause Stone Cold said so" StoneColdFuckYou`,
   `"Austin 3:16 says I just whipped your ass" CheersStoneCold`,
@@ -36,4 +38,9 @@ export const STEINERMATH =
 export const JABRONIS =
   "Goodnight FEETAMANIACS and jabronie marks without a life that don't know it a work when you work a work and work yourself into a shoot,marks";
 
-export const INITIALPOINTS = 1000; // Set your initial points value here
+// TIMERS
+export const ANSWERTIMELIMIT = 60000; // 60 seconds
+export const TRIVIA_COOLDOWN = 60000;
+export const WARNINGTIME = 10000; // 10 seconds
+export const MIN_INTERVAL = 15 * 60 * 1000; // 15 minutes
+export const MAX_INTERVAL = 45 * 60 * 1000; // 45 minutes

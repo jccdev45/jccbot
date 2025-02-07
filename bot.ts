@@ -1,18 +1,32 @@
 import schedule from "node-schedule";
-import tmi from "tmi.js";
+import { Client } from "tmi.js";
 
 import { getValidAccessToken } from "./auth";
-import { commands } from "./commands";
+import {
+  clearTriviaState,
+  commands,
+  getTriviaState,
+  startTriviaCooldown,
+} from "./commands";
 import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "./config";
-import { MAX_INTERVAL, MIN_INTERVAL, TIMED_COMMANDS } from "./constants";
+import {
+  ANSWERTIMELIMIT,
+  MAX_INTERVAL,
+  MIN_INTERVAL,
+  TIMED_COMMANDS,
+  WARNINGTIME,
+} from "./constants";
 import { fetchAndUpdateEmotes } from "./emote-fetcher";
 
-import type { CommandHandler } from "./commands";
+import type { ChatUserstate } from "tmi.js";
+
+import type { CommandHandler } from "./types";
+
 function getRandomInterval(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-async function executeRandomCommand(client: tmi.Client, channel: string) {
+async function executeRandomCommand(client: Client, channel: string) {
   const totalWeight = TIMED_COMMANDS.reduce((sum, cmd) => sum + cmd.weight, 0);
   let random = Math.random() * totalWeight;
 
@@ -20,12 +34,7 @@ async function executeRandomCommand(client: tmi.Client, channel: string) {
     if (random < cmd.weight) {
       if (cmd.command in commands) {
         const handler = commands[cmd.command] as CommandHandler;
-        const response = await handler(
-          channel,
-          {} as tmi.ChatUserstate,
-          "",
-          false
-        );
+        const response = await handler(channel, {} as ChatUserstate, "", false);
         client.say(channel, response);
       }
       return;
@@ -34,7 +43,7 @@ async function executeRandomCommand(client: tmi.Client, channel: string) {
   }
 }
 
-function scheduleNextCommand(client: tmi.Client, channel: string) {
+function scheduleNextCommand(client: Client, channel: string) {
   const interval = getRandomInterval(MIN_INTERVAL, MAX_INTERVAL);
   setTimeout(() => {
     executeRandomCommand(client, channel);
@@ -42,11 +51,43 @@ function scheduleNextCommand(client: tmi.Client, channel: string) {
   }, interval);
 }
 
+function checkTriviaTimeouts(channel: string, client: Client) {
+  let warningSent = false; // Track whether warning has been sent
+
+  const intervalId = setInterval(() => {
+    const triviaState = getTriviaState(channel);
+    if (!triviaState) {
+      clearInterval(intervalId);
+      return;
+    }
+
+    const elapsed = Date.now() - triviaState.startTime;
+
+    if (elapsed >= ANSWERTIMELIMIT) {
+      clearTriviaState(channel);
+      startTriviaCooldown(channel);
+      client.say(
+        channel,
+        `Time's up! The correct answer was ${triviaState.correctAnswer}`
+      );
+      clearInterval(intervalId);
+    } else if (elapsed >= ANSWERTIMELIMIT - WARNINGTIME && !warningSent) {
+      client.say(channel, "10 seconds left to answer!");
+      warningSent = true; // Set warning flag to prevent resending
+    }
+
+    // Clear interval if trivia ended by other means
+    if (!getTriviaState(channel)) {
+      clearInterval(intervalId);
+    }
+  }, 1000); // Check every second
+}
+
 export async function startBot() {
   try {
     const token = await getValidAccessToken();
 
-    const client = new tmi.Client({
+    const client = new Client({
       options: { debug: true },
       identity: {
         username: TWITCH_BOT_USERNAME,
@@ -75,8 +116,16 @@ export async function startBot() {
         const command = commandName.slice(1) as keyof typeof commands;
         if (command in commands) {
           const handler = commands[command] as CommandHandler;
-          const response = await handler(channel, userstate, message, self);
-          client.say(channel, response);
+          const response = await handler(channel, userstate, message);
+
+          if (response !== null) {
+            client.say(channel, response);
+          }
+
+          // Start trivia timeout check if a new trivia game started
+          if (command === "trivia" && getTriviaState(channel)) {
+            checkTriviaTimeouts(channel, client);
+          }
         } else {
           client.say(
             channel,

@@ -1,25 +1,153 @@
-import type { ChatUserstate } from "tmi.js";
-import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "./constants";
+import { JSDOM } from "jsdom";
+
+import {
+  ANSWERTIMELIMIT,
+  INITIALPOINTS,
+  JABRONIS,
+  QUOTES,
+  STEINERMATH,
+  TRIVIA_COOLDOWN,
+  WARNINGTIME,
+} from "./constants";
 import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher";
 import {
   addUserPoints,
   calculateGambleAmount,
   canClaimInitialPoints,
   getUserPoints,
-  hasClaimedInitialPoints,
   initializeUserPoints,
   setClaimedInitialPoints,
   setUserPoints,
   subtractUserPoints,
 } from "./points";
 
+import type { ChatUserstate } from "tmi.js";
+import type { TriviaState } from "./types";
+
+const activeTrivia: { [channel: string]: TriviaState } = {};
+const triviaCooldowns: { [channel: string]: number } = {};
+
 // Utility function
 function generateRandomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+function decodeHtmlEntities(text: string): string {
+  const dom = new JSDOM(text);
+  return dom.window.document.body.textContent || "";
+}
+
+export function getTriviaState(channel: string): TriviaState | null {
+  return activeTrivia[channel] || null;
+}
+
+export function clearTriviaState(channel: string): void {
+  delete activeTrivia[channel];
+}
+
+export function startTriviaCooldown(channel: string): void {
+  triviaCooldowns[channel] = Date.now();
+}
+
+export function checkTriviaTimeout(channel: string): string | null {
+  const trivia = getTriviaState(channel);
+  if (!trivia) return null;
+
+  const elapsed = Date.now() - trivia.startTime;
+  if (elapsed >= ANSWERTIMELIMIT) {
+    clearTriviaState(channel);
+    startTriviaCooldown(channel);
+    return `Time's up! The correct answer was ${trivia.correctAnswer}`;
+  } else if (elapsed >= ANSWERTIMELIMIT - WARNINGTIME) {
+    return "10 seconds left to answer!";
+  }
+
+  return null;
+}
+
 // Command handlers
 export const commands = {
+  trivia: async (channel: string, userstate: ChatUserstate) => {
+    const now = Date.now();
+    const lastUsed = triviaCooldowns[channel] || 0;
+    const cooldownRemaining = TRIVIA_COOLDOWN - (now - lastUsed);
+
+    if (cooldownRemaining > 0) {
+      const secondsRemaining = Math.ceil(cooldownRemaining / 1000);
+      return `Trivia is on cooldown. Please wait ${secondsRemaining} second${
+        secondsRemaining !== 1 ? "s" : ""
+      } before using this command again.`;
+    }
+
+    if (activeTrivia[channel]) {
+      return "There's already an active trivia game in this channel!";
+    }
+
+    try {
+      const response = await fetch(
+        "https://opentdb.com/api.php?amount=1&type=multiple"
+      );
+      const data = await response.json();
+      const questionData = data.results[0];
+
+      const question = decodeHtmlEntities(questionData.question);
+      const correctAnswer = decodeHtmlEntities(questionData.correct_answer);
+      const incorrectAnswers = questionData.incorrect_answers.map(
+        (answer: string) => decodeHtmlEntities(answer)
+      );
+
+      const answers = [correctAnswer, ...incorrectAnswers].sort(
+        () => Math.random() - 0.5
+      );
+
+      activeTrivia[channel] = {
+        question,
+        correctAnswer,
+        answers,
+        startTime: Date.now(),
+      };
+
+      return (
+        `Trivia Question: ${question}\n` +
+        answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n") +
+        "\nUse $a followed by your answer number!"
+      );
+    } catch (error) {
+      console.error("Error fetching trivia question:", error);
+      return `@${userstate.username} Sorry, couldn't fetch a trivia question stonecoldStunner`;
+    }
+  },
+
+  a: async (channel: string, userstate: ChatUserstate, message: string) => {
+    const trivia = getTriviaState(channel);
+    if (!trivia) {
+      return null; // Silent fail if no active trivia
+    }
+
+    const userAnswer = message.split(" ")[1];
+    if (!userAnswer) {
+      return null; // Silent fail for invalid input
+    }
+
+    const answerIndex = parseInt(userAnswer) - 1;
+    if (
+      isNaN(answerIndex) ||
+      answerIndex < 0 ||
+      answerIndex >= trivia.answers.length
+    ) {
+      return null; // Silent fail for invalid answer number
+    }
+
+    const selectedAnswer = trivia.answers[answerIndex];
+    if (selectedAnswer === trivia.correctAnswer) {
+      clearTriviaState(channel);
+      startTriviaCooldown(channel);
+      return `@${userstate.username} is CORRECT! The answer was ${trivia.correctAnswer} FeelsOkayMan`;
+    }
+
+    return null; // Silent fail for incorrect answer
+  },
+
   setpoints: (channel: string, userstate: ChatUserstate, message: string) => {
     const [_, recipient, amountStr] = message.split(" ");
     const amount = parseInt(amountStr, 10);
@@ -173,30 +301,6 @@ export const commands = {
     return JABRONIS;
   },
 
-  trivia: async (channel: string, userstate: ChatUserstate) => {
-    try {
-      const response = await fetch(
-        "https://opentdb.com/api.php?amount=1&type=multiple"
-      );
-      const data = await response.json();
-      const question = data.results[0];
-
-      const answers = [
-        question.correct_answer,
-        ...question.incorrect_answers,
-      ].sort(() => Math.random() - 0.5);
-
-      return (
-        `Trivia Question: ${question.question}\n` +
-        answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n") +
-        `\nUse $a followed by your answer number`
-      );
-    } catch (error) {
-      console.error("Error fetching trivia question:", error);
-      return `@${userstate.username} Sorry, couldn't fetch a trivia question stonecoldStunner`;
-    }
-  },
-
   updateemotes: async (channel: string, userstate: ChatUserstate) => {
     if (userstate.mod || userstate.username === channel.replace("#", "")) {
       try {
@@ -211,13 +315,3 @@ export const commands = {
     }
   },
 };
-
-export type CommandName = keyof typeof commands;
-
-// Types for our command handlers
-export type CommandHandler = (
-  channel: string,
-  userstate: ChatUserstate,
-  message: string,
-  self: boolean
-) => string | Promise<string>;

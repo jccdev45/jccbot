@@ -6,13 +6,7 @@ import {
   TWITCH_REDIRECT_URI,
 } from "./config";
 
-interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  scope: string[];
-  token_type: string;
-}
+import type { TokenResponse } from "./types";
 
 let accessToken: string | null = null;
 let refreshToken: string | null = null;

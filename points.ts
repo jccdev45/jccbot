@@ -1,13 +1,4 @@
-// pointsSystem.ts
-
-interface UserPoints {
-  points: number;
-  hasClaimedInitialPoints: boolean;
-}
-
-interface PointsSystem {
-  [username: string]: UserPoints;
-}
+import type { PointsSystem } from "./types";
 
 const userPoints: PointsSystem = {};
 
