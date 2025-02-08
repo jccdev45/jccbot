@@ -8,3 +8,5 @@ export const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID!;
 export const TWITCH_CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET!;
 export const TWITCH_REDIRECT_URI = process.env.TWITCH_REDIRECT_URI!;
 export const TWITCH_USER_ID = process.env.TWITCH_USER_ID!;
+export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
+export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET!;

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import dotenv from "dotenv";
 
 import {
   TWITCH_CLIENT_ID,
@@ -6,42 +6,11 @@ import {
   TWITCH_REDIRECT_URI,
 } from "./config";
 
-import type { TokenResponse } from "./types";
+dotenv.config();
 
-let accessToken: string | null = null;
-let refreshToken: string | null = null;
+let accessToken: string | null = process.env.TWITCH_BOT_TOKEN || null;
+let refreshToken: string | null = process.env.TWITCH_BOT_REFRESH_TOKEN || null;
 let tokenExpirationTime: number | null = null;
-
-function loadTokens() {
-  if (!existsSync("tokens.json")) {
-    console.log(
-      "tokens.json does not exist. Will create it when tokens are obtained."
-    );
-    return;
-  }
-  try {
-    const fileContent = readFileSync("tokens.json", "utf8");
-    if (fileContent.trim() === "") {
-      console.log(
-        "tokens.json is empty. Will populate it when tokens are obtained."
-      );
-      return;
-    }
-    const data = JSON.parse(fileContent);
-    accessToken = data.access_token || null;
-    refreshToken = data.refresh_token || null;
-    tokenExpirationTime = data.expires_at || null;
-  } catch (error) {
-    console.error("Failed to load tokens:", error);
-  }
-}
-
-function saveTokens(tokenData: TokenResponse) {
-  writeFileSync("tokens.json", JSON.stringify(tokenData));
-}
-
-// Load tokens when the module is initialized
-loadTokens();
 
 export function getAuthorizationUrl(): string {
   const scopes = ["chat:read", "chat:edit", "channel:moderate"];
@@ -55,9 +24,7 @@ export function getAuthorizationUrl(): string {
   return `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
 }
 
-export async function getAccessTokenFromCode(
-  code: string
-): Promise<TokenResponse> {
+export async function getAccessTokenFromCode(code: string): Promise<void> {
   const params = new URLSearchParams({
     client_id: TWITCH_CLIENT_ID,
     client_secret: TWITCH_CLIENT_SECRET,
@@ -75,12 +42,16 @@ export async function getAccessTokenFromCode(
     throw new Error("Failed to obtain access token");
   }
 
-  const data: TokenResponse = await response.json();
+  const data = await response.json();
   accessToken = data.access_token;
   refreshToken = data.refresh_token;
   tokenExpirationTime = Date.now() + data.expires_in * 1000;
 
-  return data;
+  console.log("New access token:", accessToken);
+  console.log("New refresh token:", refreshToken);
+  console.log(
+    "Please update these in your .env file or deployment environment."
+  );
 }
 
 async function refreshAccessToken(): Promise<void> {
@@ -104,12 +75,16 @@ async function refreshAccessToken(): Promise<void> {
     throw new Error("Failed to refresh access token");
   }
 
-  const data: TokenResponse = await response.json();
+  const data = await response.json();
   accessToken = data.access_token;
   refreshToken = data.refresh_token;
   tokenExpirationTime = Date.now() + data.expires_in * 1000;
 
-  saveTokens(data);
+  console.log("New access token:", accessToken);
+  console.log("New refresh token:", refreshToken);
+  console.log(
+    "Please update these in your .env file or deployment environment."
+  );
 }
 
 export async function getValidAccessToken(): Promise<string> {
