@@ -1,26 +1,26 @@
 import schedule from "node-schedule";
 import { Client } from "tmi.js";
 
-import { getValidAccessToken } from "./auth";
-import { commands } from "./commands";
-import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "./config";
+import { getValidAccessToken } from "@/auth.js";
+import { commands } from "@/commands.js";
+import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "@/config.js";
 import {
   ANSWERTIMELIMIT,
   MAX_INTERVAL,
   MIN_INTERVAL,
   TIMED_COMMANDS,
   WARNINGTIME,
-} from "./constants";
-import { fetchAndUpdateEmotes } from "./emote-fetcher";
+} from "@/constants.js";
+import { fetchAndUpdateEmotes } from "@/emote-fetcher.js";
 import {
   clearTriviaState,
   getTriviaState,
   startTriviaCooldown,
-} from "./trivia";
+} from "@/trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
 
-import type { CommandHandler } from "./types";
+import type { CommandHandler } from "@/types.js";
 function getRandomInterval(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -110,7 +110,7 @@ export async function startBot() {
     client.on("message", async (channel, userstate, message, self) => {
       if (self) return;
 
-      const commandName = message.split(" ")[0].toLowerCase();
+      const commandName = message.split(" ")[0]?.toLowerCase() ?? "";
       if (commandName.startsWith("$")) {
         const command = commandName.slice(1) as keyof typeof commands;
         if (command in commands) {

@@ -1,9 +1,9 @@
 import { JSDOM } from "jsdom";
 
-import { ANSWERTIMELIMIT, TRIVIA_COOLDOWN, WARNINGTIME } from "./constants";
+import { ANSWERTIMELIMIT, TRIVIA_COOLDOWN, WARNINGTIME } from "@/constants.js";
 
 import type { ChatUserstate } from "tmi.js";
-import type { TriviaState } from "./types";
+import type { TriviaState } from "@/types.js";
 
 const activeTrivia: { [channel: string]: TriviaState } = {};
 const triviaCooldowns: { [channel: string]: number } = {};

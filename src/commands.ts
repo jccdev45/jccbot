@@ -1,5 +1,5 @@
-import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "./constants";
-import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher";
+import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "@/constants.js";
+import { fetchAndUpdateEmotes, getRandomEmote } from "@/emote-fetcher.js";
 import {
   addUserPoints,
   calculateGambleAmount,
@@ -9,18 +9,30 @@ import {
   setClaimedInitialPoints,
   setUserPoints,
   subtractUserPoints,
-} from "./points";
-import { fetchTrivia, handleTriviaAnswer } from "./trivia";
+} from "@/points.js";
+import { fetchTrivia, handleTriviaAnswer } from "@/trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
 
 // Utility function
 function generateRandomItem<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
+  if (array.length === 0) {
+    throw new Error("Array cannot be empty");
+  }
+  return array[Math.floor(Math.random() * array.length)]!;
 }
 
 // Command handlers
 export const commands = {
+  // song: async (channel: string, userstate: ChatUserstate) => {
+  //   try {
+  //     const song = await fetchSong();
+  //   } catch (error) {
+  //     console.error("Error fetching song (commands.ts): ", error);
+  //     return "Error fetching song. Please try again later.";
+  //   }
+  // },
+
   trivia: async (channel: string, userstate: ChatUserstate) => {
     try {
       const trivia = await fetchTrivia(channel, userstate);
@@ -43,7 +55,10 @@ export const commands = {
 
   setpoints: (channel: string, userstate: ChatUserstate, message: string) => {
     const [_, recipient, amountStr] = message.split(" ");
-    const amount = parseInt(amountStr, 10);
+    const amount = amountStr ? parseInt(amountStr, 10) : 0;
+    if (!recipient) {
+      return "Recipient is not specified.";
+    }
 
     if (userstate.username !== channel) return "uumActually nice try";
 
@@ -80,7 +95,7 @@ export const commands = {
       return `@${username} you're broke! Try $claim if you haven't already claimed your initial points livJAM`;
     }
 
-    const amount = calculateGambleAmount(input, currentPoints);
+    const amount = calculateGambleAmount(input || "", currentPoints);
 
     if (amount <= 0 || amount > currentPoints) {
       return `wideSHUTUPBITCH @${username}`;
@@ -129,9 +144,13 @@ export const commands = {
       return `@${sender} try $claim first livJAM`;
     }
 
-    initializeUserPoints(recipient);
+    if (recipient) {
+      initializeUserPoints(recipient);
+    } else {
+      return "Recipient is not specified.";
+    }
 
-    const amount = calculateGambleAmount(input, senderPoints);
+    const amount = calculateGambleAmount(input || "", senderPoints);
 
     if (amount <= 0 || amount > senderPoints) {
       return `wideSHUTUPBITCH @${sender}`;

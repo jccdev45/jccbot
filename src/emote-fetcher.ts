@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 
-import { TWITCH_USER_ID } from "./config";
+import { TWITCH_USER_ID } from "@/config.js";
 
 const EMOTES_FILE = "channel_emotes.txt";
 
@@ -61,5 +61,8 @@ export async function getRandomEmote(): Promise<string> {
   if (emotes.length === 0) {
     throw new Error("No emotes available");
   }
-  return emotes[Math.floor(Math.random() * emotes.length)];
+  if (emotes.length === 0) {
+    throw new Error("No emotes available");
+  }
+  return emotes[Math.floor(Math.random() * emotes.length)]!;
 }

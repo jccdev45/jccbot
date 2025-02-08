@@ -1,23 +1,25 @@
 {
   "name": "jccbot",
-  "module": "main.ts",
-  "scripts": {
-    "start": "bun run main.ts --watch"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/jsdom": "^21.1.7",
-    "@types/node-schedule": "^2.1.7",
-    "@types/tmi.js": "^1.8.6"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "type": "module",
+  "main": "dist/main.ts",
   "dependencies": {
     "dotenv": "^16.4.7",
     "jsdom": "^26.0.0",
     "node-schedule": "^2.1.1",
     "tmi.js": "tmijs/tmi.js#v1.9.0-wip"
-  }
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/jsdom": "^21.1.7",
+    "@types/node-schedule": "^2.1.7",
+    "@types/tmi.js": "^1.8.6",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "start:bun": "bun run src/main.ts --watch",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev:tsc": "tsc --watch --preserveWatchOutput",
+    "dev:node": "node --enable-source-maps --watch dist/main.js"
+  },
+  "type": "module"
 }
