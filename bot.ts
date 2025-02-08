@@ -2,12 +2,7 @@ import schedule from "node-schedule";
 import { Client } from "tmi.js";
 
 import { getValidAccessToken } from "./auth";
-import {
-  clearTriviaState,
-  commands,
-  getTriviaState,
-  startTriviaCooldown,
-} from "./commands";
+import { commands } from "./commands";
 import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "./config";
 import {
   ANSWERTIMELIMIT,
@@ -17,11 +12,15 @@ import {
   WARNINGTIME,
 } from "./constants";
 import { fetchAndUpdateEmotes } from "./emote-fetcher";
+import {
+  clearTriviaState,
+  getTriviaState,
+  startTriviaCooldown,
+} from "./trivia";
 
 import type { ChatUserstate } from "tmi.js";
 
 import type { CommandHandler } from "./types";
-
 function getRandomInterval(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }

@@ -18,8 +18,8 @@ async function get7TVChannelEmotes(twitchUserId: string): Promise<string[]> {
     console.warn("No emotes found in 7TV response");
     return [];
   }
-  console.log("🚀 emotes ", data.emote_set.emotes);
-  return data.emote_set.emotes.map((emote: any) => emote.name);
+
+  return data.emote_set.emotes.map((emote: any) => emote.name).sort();
 }
 
 export async function fetchAndUpdateEmotes(): Promise<string[]> {
