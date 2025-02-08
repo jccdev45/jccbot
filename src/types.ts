@@ -1,5 +1,5 @@
 import type { ChatUserstate } from "tmi.js";
-import type { commands } from "@/commands.js";
+import type { commands } from "./commands.js";
 
 export interface TriviaState {
   question: string;

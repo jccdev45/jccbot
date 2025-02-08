@@ -1,4 +1,4 @@
-import type { PointsSystem } from "@/types.js";
+import type { PointsSystem } from "./types.js";
 
 const userPoints: PointsSystem = {};
 

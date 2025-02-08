@@ -1,26 +1,26 @@
 import schedule from "node-schedule";
 import { Client } from "tmi.js";
 
-import { getValidAccessToken } from "@/auth.js";
-import { commands } from "@/commands.js";
-import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "@/config.js";
+import { getValidAccessToken } from "./auth.js";
+import { commands } from "./commands.js";
+import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "./config.js";
 import {
   ANSWERTIMELIMIT,
   MAX_INTERVAL,
   MIN_INTERVAL,
   TIMED_COMMANDS,
   WARNINGTIME,
-} from "@/constants.js";
-import { fetchAndUpdateEmotes } from "@/emote-fetcher.js";
+} from "./constants.js";
+import { fetchAndUpdateEmotes } from "./emote-fetcher.js";
 import {
   clearTriviaState,
   getTriviaState,
   startTriviaCooldown,
-} from "@/trivia.js";
+} from "./trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
 
-import type { CommandHandler } from "@/types.js";
+import type { CommandHandler } from "./types.js";
 function getRandomInterval(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }

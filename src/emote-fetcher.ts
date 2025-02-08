@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 
-import { TWITCH_USER_ID } from "@/config.js";
+import { TWITCH_USER_ID } from "./config.js";
 
 const EMOTES_FILE = "channel_emotes.txt";
 

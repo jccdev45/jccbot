@@ -1,5 +1,5 @@
-import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "@/constants.js";
-import { fetchAndUpdateEmotes, getRandomEmote } from "@/emote-fetcher.js";
+import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "./constants.js";
+import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher.js";
 import {
   addUserPoints,
   calculateGambleAmount,
@@ -9,8 +9,8 @@ import {
   setClaimedInitialPoints,
   setUserPoints,
   subtractUserPoints,
-} from "@/points.js";
-import { fetchTrivia, handleTriviaAnswer } from "@/trivia.js";
+} from "./points.js";
+import { fetchTrivia, handleTriviaAnswer } from "./trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
 

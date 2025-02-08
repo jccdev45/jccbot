@@ -1,4 +1,4 @@
-import type { CommandName } from "@/types.js";
+import type { CommandName } from "./types.js";
 
 export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
   { command: "emote", weight: 0.5 },
