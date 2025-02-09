@@ -2,7 +2,7 @@ import { JSDOM } from "jsdom";
 
 import { ANSWERTIMELIMIT, TRIVIA_COOLDOWN, WARNINGTIME } from "./constants.js";
 
-import type { ChatUserstate } from "tmi.js";
+import type { ChatUserstate, Client } from "tmi.js";
 import type { TriviaState } from "./types.js";
 
 const activeTrivia: { [channel: string]: TriviaState } = {};
@@ -25,20 +25,45 @@ export function startTriviaCooldown(channel: string): void {
   triviaCooldowns[channel] = Date.now();
 }
 
-export function checkTriviaTimeout(channel: string): string | null {
-  const trivia = getTriviaState(channel);
-  if (!trivia) return null;
+export function checkTriviaTimeouts(channel: string, client: Client) {
+  let warningSent = false;
+  let intervalId: NodeJS.Timeout | null = null;
 
-  const elapsed = Date.now() - trivia.startTime;
-  if (elapsed >= ANSWERTIMELIMIT) {
-    clearTriviaState(channel);
-    startTriviaCooldown(channel);
-    return `Time's up! The correct answer was ${trivia.correctAnswer} AsukaThumbsDown`;
-  } else if (elapsed >= ANSWERTIMELIMIT - WARNINGTIME) {
-    return "10 seconds left to answer hurryup";
+  const checkTimeout = () => {
+    const triviaState = getTriviaState(channel);
+    if (!triviaState) {
+      if (intervalId) clearInterval(intervalId);
+      return;
+    }
+
+    const elapsed = Date.now() - triviaState.startTime;
+
+    if (elapsed >= ANSWERTIMELIMIT) {
+      clearTriviaState(channel);
+      startTriviaCooldown(channel);
+      client.say(
+        channel,
+        `Time's up! The correct answer was ${triviaState.correctAnswer} AsukaThumbsDown`
+      );
+      if (intervalId) clearInterval(intervalId);
+    } else if (elapsed >= ANSWERTIMELIMIT - WARNINGTIME && !warningSent) {
+      client.say(channel, "10 seconds left to answer! hurryup");
+      warningSent = true;
+    }
+  };
+
+  // Only start a new interval if one doesn't already exist
+  if (!intervalId) {
+    intervalId = setInterval(checkTimeout, 1000) as NodeJS.Timeout;
   }
 
-  return null;
+  // Return a function to clear the interval
+  return () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
 }
 
 export async function fetchTrivia(channel: string, userstate: ChatUserstate) {
@@ -82,9 +107,9 @@ export async function fetchTrivia(channel: string, userstate: ChatUserstate) {
     };
 
     return (
-      `Trivia Question: ${question}\n` +
-      answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n") +
-      "\nUse $a followed by your answer number!"
+      `${question}\n` +
+      answers.map((answer, index) => `${index + 1}. ${answer}`).join(" | ") +
+      " | Use $a followed by your answer number!"
     );
   } catch (error) {
     console.error("Error fetching trivia question (trivia.ts): ", error);
