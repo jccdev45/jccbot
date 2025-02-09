@@ -4,23 +4,14 @@ import { Client } from "tmi.js";
 import { getValidAccessToken } from "./auth.js";
 import { commands } from "./commands.js";
 import { TWITCH_BOT_USERNAME, TWITCH_CHANNEL } from "./config.js";
-import {
-  ANSWERTIMELIMIT,
-  MAX_INTERVAL,
-  MIN_INTERVAL,
-  TIMED_COMMANDS,
-  WARNINGTIME,
-} from "./constants.js";
+import { MAX_INTERVAL, MIN_INTERVAL, TIMED_COMMANDS } from "./constants.js";
 import { fetchAndUpdateEmotes } from "./emote-fetcher.js";
-import {
-  clearTriviaState,
-  getTriviaState,
-  startTriviaCooldown,
-} from "./trivia.js";
+import { checkTriviaTimeouts, getTriviaState } from "./trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
 
 import type { CommandHandler } from "./types.js";
+
 function getRandomInterval(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
@@ -50,38 +41,6 @@ function scheduleNextCommand(client: Client, channel: string) {
   }, interval);
 }
 
-function checkTriviaTimeouts(channel: string, client: Client) {
-  let warningSent = false; // Track whether warning has been sent
-
-  const intervalId = setInterval(() => {
-    const triviaState = getTriviaState(channel);
-    if (!triviaState) {
-      clearInterval(intervalId);
-      return;
-    }
-
-    const elapsed = Date.now() - triviaState.startTime;
-
-    if (elapsed >= ANSWERTIMELIMIT) {
-      clearTriviaState(channel);
-      startTriviaCooldown(channel);
-      client.say(
-        channel,
-        `Time's up! The correct answer was ${triviaState.correctAnswer}`
-      );
-      clearInterval(intervalId);
-    } else if (elapsed >= ANSWERTIMELIMIT - WARNINGTIME && !warningSent) {
-      client.say(channel, "10 seconds left to answer!");
-      warningSent = true; // Set warning flag to prevent resending
-    }
-
-    // Clear interval if trivia ended by other means
-    if (!getTriviaState(channel)) {
-      clearInterval(intervalId);
-    }
-  }, 1000); // Check every second
-}
-
 export async function startBot() {
   try {
     const token = await getValidAccessToken();
@@ -103,9 +62,11 @@ export async function startBot() {
         await fetchAndUpdateEmotes();
         console.log("Daily emote update completed");
       } catch (error) {
-        console.error("Error during daily emote update:", error);
+        console.error("Error during daily emote update: ", error);
       }
     });
+
+    let clearTriviaTimeout: (() => void) | null = null;
 
     client.on("message", async (channel, userstate, message, self) => {
       if (self) return;
@@ -121,9 +82,23 @@ export async function startBot() {
             client.say(channel, response);
           }
 
-          // Start trivia timeout check if a new trivia game started
-          if (command === "trivia" && getTriviaState(channel)) {
-            checkTriviaTimeouts(channel, client);
+          // Handle trivia command
+          if (command === "trivia") {
+            const triviaState = getTriviaState(channel);
+            if (triviaState) {
+              // Clear existing timeout if there is one
+              if (clearTriviaTimeout) {
+                clearTriviaTimeout();
+              }
+              // Start new timeout
+              clearTriviaTimeout = checkTriviaTimeouts(channel, client);
+            } else {
+              // If trivia state is null, it means either no game is in progress or it's on cooldown
+              client.say(
+                channel,
+                `Trivia is currently unavailable. Please try again later.`
+              );
+            }
           }
         } else {
           client.say(
