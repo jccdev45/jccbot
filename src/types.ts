@@ -16,7 +16,7 @@ export type CommandHandler = (
   userstate: ChatUserstate,
   message: string,
   self?: boolean
-) => string | Promise<string>;
+) => string | Promise<string | null>;
 
 export interface TokenResponse {
   access_token: string;

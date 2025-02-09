@@ -11,9 +11,14 @@ import {
   subtractUserPoints,
 } from "./points.js";
 import { getCurrentSong } from "./spotify.js";
+import { getChannelTitle } from "./title.js";
 import { fetchTrivia, handleTriviaAnswer } from "./trivia.js";
+import { CommandHandler } from "./types.js";
 
 import type { ChatUserstate } from "tmi.js";
+interface Commands {
+  [key: string]: CommandHandler;
+}
 
 // Utility function
 function generateRandomItem<T>(array: T[]): T {
@@ -24,7 +29,15 @@ function generateRandomItem<T>(array: T[]): T {
 }
 
 // Command handlers
-export const commands = {
+export const commands: Commands = {
+  site: () => {
+    return `https://jccdev.vercel.app wideJime`;
+  },
+
+  socials: () => {
+    return `Twitter: https://twitter.com/jccdev | IG: https://instagram.com/jccdev`;
+  },
+
   song: async (channel: string, userstate: ChatUserstate) => {
     if (userstate.username !== channel.replace("#", ""))
       return "uumActually nice try";
@@ -58,7 +71,7 @@ export const commands = {
 
   a: async (channel: string, userstate: ChatUserstate, message: string) => {
     try {
-      const answer = handleTriviaAnswer(channel, userstate, message);
+      const answer = await handleTriviaAnswer(channel, userstate, message);
       return answer;
     } catch (error) {
       console.error("Error handling trivia answer (commands.ts): ", error);
@@ -201,7 +214,7 @@ export const commands = {
     }
   },
 
-  emote: async (channel: string, userstate: ChatUserstate) => {
+  emote: async () => {
     try {
       const randomEmote = await getRandomEmote();
       return randomEmote;
@@ -211,19 +224,19 @@ export const commands = {
     }
   },
 
-  quote: (channel: string) => {
+  quote: () => {
     return generateRandomItem(QUOTES);
   },
 
-  commands: (channel: string) => {
+  commands: () => {
     return "See https://github.com/jccdev45/jccbot/blob/main/commands-list.md  for a list of commands";
   },
 
-  steinermath: (channel: string) => {
+  steinermath: () => {
     return STEINERMATH;
   },
 
-  goodnight: (channel: string) => {
+  goodnight: () => {
     return JABRONIS;
   },
 
@@ -242,6 +255,22 @@ export const commands = {
   },
 
   feet: () => {
-    return `SpiritEel`;
+    return `Jime Thinking1 ${generateRandomItem([
+      "mistleToe",
+      "peepoFeet",
+    ])} Thinking2`;
+  },
+
+  title: async (channel: string, userstate: ChatUserstate) => {
+    console.log("🚀 ~ title: ~ userstate:", userstate);
+    const username = userstate.username;
+
+    try {
+      const title = await getChannelTitle(username);
+      return title;
+    } catch (error) {
+      console.error("Error getting title (commands.ts): ", error);
+      return "Error fetching title. Please try again later.";
+    }
   },
 };

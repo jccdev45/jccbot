@@ -1,8 +1,10 @@
 import type { CommandName } from "./types.js";
 
 export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
-  { command: "emote", weight: 0.5 },
-  { command: "quote", weight: 0.5 },
+  { command: "emote", weight: 0.7 },
+  { command: "quote", weight: 0.3 },
+  { command: "site", weight: 0.3 },
+  { command: "socials", weight: 0.2 },
 ];
 
 export const SCOPES = ["user-read-currently-playing"];

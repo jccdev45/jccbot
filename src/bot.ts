@@ -25,7 +25,9 @@ async function executeRandomCommand(client: Client, channel: string) {
       if (cmd.command in commands) {
         const handler = commands[cmd.command] as CommandHandler;
         const response = await handler(channel, {} as ChatUserstate, "", false);
-        client.say(channel, response);
+        if (response !== null) {
+          client.say(channel, response);
+        }
       }
       return;
     }

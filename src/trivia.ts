@@ -121,32 +121,39 @@ export async function handleTriviaAnswer(
   channel: string,
   userstate: ChatUserstate,
   message: string
-) {
-  const trivia = getTriviaState(channel);
-  if (!trivia) {
-    return null; // Silent fail if no active trivia
-  }
+): Promise<string | null> {
+  try {
+    const trivia = getTriviaState(channel);
 
-  const userAnswer = message.split(" ")[1];
-  if (!userAnswer) {
-    return null; // Silent fail for invalid input
-  }
+    if (!trivia || message.includes("$a ")) {
+      // No active trivia session
+      return null; // or return "No active trivia session." if you want to inform the user
+    }
 
-  const answerIndex = parseInt(userAnswer) - 1;
-  if (
-    isNaN(answerIndex) ||
-    answerIndex < 0 ||
-    answerIndex >= trivia.answers.length
-  ) {
-    return null; // Silent fail for invalid answer number
-  }
+    const userAnswer = message.split(" ")[1];
+    if (!userAnswer) {
+      return null; // Silent fail for invalid input
+    }
 
-  const selectedAnswer = trivia.answers[answerIndex];
-  if (selectedAnswer === trivia.correctAnswer) {
-    clearTriviaState(channel);
-    startTriviaCooldown(channel);
-    return `@${userstate.username} is CORRECT! The answer was ${trivia.correctAnswer} OrangeCassidyARRIVE`;
-  }
+    const answerIndex = parseInt(userAnswer) - 1;
+    if (
+      isNaN(answerIndex) ||
+      answerIndex < 0 ||
+      answerIndex >= trivia.answers.length
+    ) {
+      return null; // Silent fail for invalid answer number
+    }
 
-  return null; // Silent fail for incorrect answer
+    const selectedAnswer = trivia.answers[answerIndex];
+    if (selectedAnswer === trivia.correctAnswer) {
+      clearTriviaState(channel);
+      startTriviaCooldown(channel);
+      return `@${userstate.username} is CORRECT! The answer was ${trivia.correctAnswer} OrangeCassidyARRIVE`;
+    }
+
+    return null; // Silent fail for incorrect answer
+  } catch (error) {
+    console.error("Error handling trivia answer: ", error);
+    return "An error occurred while processing your answer. Please try again later.";
+  }
 }
