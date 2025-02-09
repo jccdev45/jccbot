@@ -5,6 +5,9 @@ export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
   { command: "quote", weight: 0.5 },
 ];
 
+export const SCOPES = ["user-read-currently-playing"];
+export const SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback";
+
 // TRIVIA
 export const INITIALPOINTS = 1000;
 

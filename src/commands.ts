@@ -10,6 +10,7 @@ import {
   setUserPoints,
   subtractUserPoints,
 } from "./points.js";
+import { getCurrentSong } from "./spotify.js";
 import { fetchTrivia, handleTriviaAnswer } from "./trivia.js";
 
 import type { ChatUserstate } from "tmi.js";
@@ -24,14 +25,26 @@ function generateRandomItem<T>(array: T[]): T {
 
 // Command handlers
 export const commands = {
-  // song: async (channel: string, userstate: ChatUserstate) => {
-  //   try {
-  //     const song = await fetchSong();
-  //   } catch (error) {
-  //     console.error("Error fetching song (commands.ts): ", error);
-  //     return "Error fetching song. Please try again later.";
-  //   }
-  // },
+  song: async (channel: string, userstate: ChatUserstate) => {
+    if (userstate.username !== channel.replace("#", ""))
+      return "uumActually nice try";
+
+    try {
+      const song = await getCurrentSong();
+      const emote = generateRandomItem([
+        "patrickPls",
+        "VibeGandalf",
+        "YouLookFlyToday",
+        "ZaynDance",
+        "cenaJAM",
+        "cenaJAMPARTY",
+      ]);
+      return song + " " + emote;
+    } catch (error) {
+      console.error("Error fetching song (commands.ts): ", error);
+      return "Error fetching song. Please try again later.";
+    }
+  },
 
   trivia: async (channel: string, userstate: ChatUserstate) => {
     try {
@@ -60,7 +73,8 @@ export const commands = {
       return "Recipient is not specified.";
     }
 
-    if (userstate.username !== channel) return "uumActually nice try";
+    if (userstate.username !== channel.replace("#", ""))
+      return "uumActually nice try";
 
     if (isNaN(amount) || amount < 0) {
       return `ARISEN`;
@@ -223,7 +237,7 @@ export const commands = {
         return `Error updating emotes. Please check the logs.`;
       }
     } else {
-      return "This command is for moderators only.";
+      return "uumActually Nice try";
     }
   },
 
