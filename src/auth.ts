@@ -47,11 +47,11 @@ export async function getAccessTokenFromCode(code: string): Promise<void> {
   refreshToken = data.refresh_token;
   tokenExpirationTime = Date.now() + data.expires_in * 1000;
 
-  console.log("New access token:", accessToken);
-  console.log("New refresh token:", refreshToken);
-  console.log(
-    "Please update these in your .env file or deployment environment."
-  );
+  // console.log("New access token: ", accessToken);
+  // console.log("New refresh token: ", refreshToken);
+  // console.log(
+  //   "Please update these in your .env file or deployment environment."
+  // );
 }
 
 async function refreshAccessToken(): Promise<void> {
@@ -80,11 +80,11 @@ async function refreshAccessToken(): Promise<void> {
   refreshToken = data.refresh_token;
   tokenExpirationTime = Date.now() + data.expires_in * 1000;
 
-  console.log("New access token:", accessToken);
-  console.log("New refresh token:", refreshToken);
-  console.log(
-    "Please update these in your .env file or deployment environment."
-  );
+  // console.log("New access token:", accessToken);
+  // console.log("New refresh token:", refreshToken);
+  // console.log(
+  //   "Please update these in your .env file or deployment environment."
+  // );
 }
 
 export async function getValidAccessToken(): Promise<string> {
