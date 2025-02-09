@@ -176,3 +176,4 @@ dist
 /tokens.json
 /authorize.ts
 /channel_emotes.txt
+/spotify-auth.ts
