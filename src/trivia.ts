@@ -125,7 +125,7 @@ export async function handleTriviaAnswer(
   try {
     const trivia = getTriviaState(channel);
 
-    if (!trivia || message.includes("$a ")) {
+    if (!trivia) {
       // No active trivia session
       return null; // or return "No active trivia session." if you want to inform the user
     }
