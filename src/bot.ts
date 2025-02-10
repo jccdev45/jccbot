@@ -95,11 +95,7 @@ export async function startBot() {
               // Start new timeout
               clearTriviaTimeout = checkTriviaTimeouts(channel, client);
             } else {
-              // If trivia state is null, it means either no game is in progress or it's on cooldown
-              client.say(
-                channel,
-                `Trivia is currently unavailable. Please try again later.`
-              );
+              return null;
             }
           }
         } else {
