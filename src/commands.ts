@@ -258,11 +258,13 @@ export const commands: Commands = {
     return `Jime Thinking1 ${generateRandomItem([
       "mistleToe",
       "peepoFeet",
+      "squish",
+      "WidePeepoFeet",
+      "CleanFoot",
     ])} Thinking2`;
   },
 
   title: async (channel: string, userstate: ChatUserstate) => {
-    console.log("🚀 ~ title: ~ userstate:", userstate);
     const username = userstate.username;
 
     try {
@@ -272,5 +274,13 @@ export const commands: Commands = {
       console.error("Error getting title (commands.ts): ", error);
       return "Error fetching title. Please try again later.";
     }
+  },
+
+  sleep: (channel: string, userstate: ChatUserstate) => {
+    const username = userstate.username;
+
+    if (username !== channel.replace("#", "")) return "uumActually nice try";
+
+    return `@${username} is now sleeping! Jime ZZZ 💤`;
   },
 };
