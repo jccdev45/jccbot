@@ -1,4 +1,12 @@
-import { INITIALPOINTS, JABRONIS, QUOTES, STEINERMATH } from "./constants.js";
+import {
+  INITIALPOINTS,
+  INSTA,
+  JABRONIS,
+  QUOTES,
+  SITE,
+  STEINERMATH,
+  TWITTER,
+} from "./constants.js";
 import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher.js";
 import {
   addUserPoints,
@@ -13,29 +21,54 @@ import {
 import { getCurrentSong } from "./spotify.js";
 import { getChannelTitle } from "./title.js";
 import { fetchTrivia, handleTriviaAnswer } from "./trivia.js";
-import { CommandHandler } from "./types.js";
+import { Commands } from "./types.js";
+import { generateRandomItem, removeCommand } from "./util.js";
 
 import type { ChatUserstate } from "tmi.js";
-interface Commands {
-  [key: string]: CommandHandler;
-}
-
-// Utility function
-function generateRandomItem<T>(array: T[]): T {
-  if (array.length === 0) {
-    throw new Error("Array cannot be empty");
-  }
-  return array[Math.floor(Math.random() * array.length)]!;
-}
+let currentProject = "";
 
 // Command handlers
 export const commands: Commands = {
+  // test: (channel: string, userstate: ChatUserstate, message: string) => {
+  //   const parsed = parseMessageDynamically(message);
+  //   return JSON.stringify(parsed) ?? "🦶";
+  // },
+
+  stats: () => {
+    return `https://stats.streamelements.com/c/jccdev45`;
+  },
+
+  setproject: (channel: string, userstate: ChatUserstate, message: string) => {
+    if (userstate.username !== channel.replace("#", ""))
+      return "uumActually nice try";
+
+    currentProject = removeCommand(message);
+
+    return `Project set to: ${currentProject} wideJime MyBelovedWide`;
+  },
+
+  project: (channel: string, userstate: ChatUserstate, message: string) => {
+    const projectString = currentProject
+      ? `Currently working on: ${currentProject} Jime emoteTyping`
+      : `Jime GunPoint wave`;
+
+    return projectString;
+  },
+
   site: () => {
-    return `https://jccdev.vercel.app wideJime`;
+    return `${SITE} wideJime yassified`;
+  },
+
+  twitter: () => {
+    return `${TWITTER} Jime RainTime`;
+  },
+
+  ig: () => {
+    return `${INSTA} Jime 4K`;
   },
 
   socials: () => {
-    return `Twitter: https://twitter.com/jccdev | IG: https://instagram.com/jccdev`;
+    return `💻 ${SITE} / 🐤 ${TWITTER} / 📷 ${INSTA}`;
   },
 
   song: async (channel: string, userstate: ChatUserstate) => {
@@ -51,6 +84,12 @@ export const commands: Commands = {
         "ZaynDance",
         "cenaJAM",
         "cenaJAMPARTY",
+        "Jime RockTime",
+        "Jime SaxTime",
+        "Jime FluteTime",
+        "wideJime RockTime",
+        "wideJime SaxTime",
+        "wideJime FluteTime",
       ]);
       return song + " " + emote;
     } catch (error) {

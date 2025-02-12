@@ -34,3 +34,11 @@ export interface UserPoints {
 export interface PointsSystem {
   [username: string]: UserPoints;
 }
+
+export interface Commands {
+  [key: string]: CommandHandler;
+}
+
+export interface ParsedDynamicMessage {
+  [key: string]: string | undefined; // Allows dynamic keys like firstWord, secondWord, etc.
+}

@@ -101,7 +101,7 @@ export async function startBot() {
         } else {
           client.say(
             channel,
-            `@${userstate.username} Unrecognized command CONSIDERING`
+            `@${userstate.username} Unrecognized command Jime Shyfingers`
           );
         }
       }

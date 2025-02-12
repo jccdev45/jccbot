@@ -3,7 +3,6 @@ import type { CommandName } from "./types.js";
 export const TIMED_COMMANDS: Array<{ command: CommandName; weight: number }> = [
   { command: "emote", weight: 0.7 },
   { command: "quote", weight: 0.5 },
-  { command: "site", weight: 0.1 },
   { command: "socials", weight: 0.1 },
 ];
 
@@ -12,6 +11,11 @@ export const SPOTIFY_REDIRECT_URI = "http://localhost:8888/callback";
 
 // TRIVIA
 export const INITIALPOINTS = 1000;
+
+// SOCIALS
+export const SITE = `https://jccdev.vercel.app`;
+export const INSTA = `https://instagram.com/jccdev`;
+export const TWITTER = `https://twitter.com/jccdev`;
 
 // VARIOUS STRINGS
 export const QUOTES = [
