@@ -1,7 +1,10 @@
 import { getValidAccessToken } from "./auth.js";
 import { TWITCH_CLIENT_ID, TWITCH_USER_ID } from "./config.js";
 
-export async function getChannelTitle(username?: string): Promise<string> {
+export async function getChannelTitle(
+  channel: string,
+  username?: string
+): Promise<string> {
   try {
     const token = await getValidAccessToken();
 
@@ -15,7 +18,9 @@ export async function getChannelTitle(username?: string): Promise<string> {
       }
     );
     const channelData = await channelResponse.json();
-    return `@${username} Title for jccdev45: ${channelData.data[0].title}`;
+    return `@${username} Title for ${channel.replace("#", "")}: ${
+      channelData.data[0].title
+    }`;
   } catch (error) {
     console.error("Error fetching channel title: ", error);
     return "";

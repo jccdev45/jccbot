@@ -7,6 +7,7 @@ import {
   STEINERMATH,
   TWITTER,
 } from "./constants.js";
+import { getDefinition } from "./define.js";
 import { fetchAndUpdateEmotes, getRandomEmote } from "./emote-fetcher.js";
 import {
   addUserPoints,
@@ -25,6 +26,7 @@ import { Commands } from "./types.js";
 import { generateRandomItem, removeCommand } from "./util.js";
 
 import type { ChatUserstate } from "tmi.js";
+
 let currentProject = "";
 
 // Command handlers
@@ -34,8 +36,8 @@ export const commands: Commands = {
   //   return JSON.stringify(parsed) ?? "🦶";
   // },
 
-  stats: () => {
-    return `https://stats.streamelements.com/c/jccdev45`;
+  stats: (channel: string) => {
+    return `https://stats.streamelements.com/c/${channel.replace("#", "")}`;
   },
 
   setproject: (channel: string, userstate: ChatUserstate, message: string) => {
@@ -47,7 +49,7 @@ export const commands: Commands = {
     return `Project set to: ${currentProject} wideJime MyBelovedWide`;
   },
 
-  project: (channel: string, userstate: ChatUserstate, message: string) => {
+  project: () => {
     const projectString = currentProject
       ? `Currently working on: ${currentProject} Jime emoteTyping`
       : `Jime GunPoint wave`;
@@ -72,8 +74,7 @@ export const commands: Commands = {
   },
 
   song: async (channel: string, userstate: ChatUserstate) => {
-    if (userstate.username !== channel.replace("#", ""))
-      return "uumActually nice try";
+    if (userstate.username !== "jccdev45") return "uumActually nice try";
 
     try {
       const song = await getCurrentSong();
@@ -268,7 +269,7 @@ export const commands: Commands = {
   },
 
   commands: () => {
-    return "See https://github.com/jccdev45/jccbot/blob/main/commands-list.md  for a list of commands";
+    return "See https://github.com/jccdev45/jccbot/blob/main/commands-list.md for a list of commands";
   },
 
   steinermath: () => {
@@ -307,7 +308,7 @@ export const commands: Commands = {
     const username = userstate.username;
 
     try {
-      const title = await getChannelTitle(username);
+      const title = await getChannelTitle(channel, username);
       return title;
     } catch (error) {
       console.error("Error getting title (commands.ts): ", error);
@@ -318,8 +319,13 @@ export const commands: Commands = {
   sleep: (channel: string, userstate: ChatUserstate) => {
     const username = userstate.username;
 
-    if (username !== channel.replace("#", "")) return "uumActually nice try";
-
     return `@${username} is now sleeping! Jime ZZZ 💤`;
+  },
+
+  define: (channel: string, userstate: ChatUserstate, message: string) => {
+    const username = userstate.username;
+    const word = message.split(" ")[1];
+
+    return getDefinition(word, username);
   },
 };
